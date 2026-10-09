@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NagrikOne | Smart City Command & Citizen Services Platform</title>
+    
+    <!-- FontAwesome Icons & Chart.js -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- HEADER / NAVIGATION -->
+    <header>
+        <a href="#" class="brand-logo">
+            <i class="fa-solid fa-city"></i>
+            <span>NagrikOne</span>
+            <span class="brand-badge">SDG 11</span>
+        </a>
+
+        <!-- Pan-India Auto-Suggest & Real-Time GPS -->
+        <div class="location-search-wrapper">
+            <div class="location-bar">
+                <i class="fa-solid fa-location-dot" style="color: var(--primary-cyan);"></i>
+                <input type="text" id="globalLocationInput" placeholder="Click GPS icon or search city/locality..." autocomplete="off">
+                <button class="gps-btn" id="gpsAutoBtn" onclick="getExactGPSLocation()" title="Detect Exact GPS Address">
+                    <i class="fa-solid fa-crosshairs"></i>
+                </button>
+            </div>
+            <div class="location-suggestions" id="locationSuggestions"></div>
+        </div>
+
+        <div class="header-actions">
+            <button class="btn btn-purple" onclick="openPitchModal()"><i class="fa-solid fa-trophy"></i> Pitch Deck</button>
+            <div id="authContainer">
+                <button class="btn btn-cyan" onclick="openAuthModal()"><i class="fa-solid fa-right-to-bracket"></i> Login / Register</button>
+            </div>
+        </div>
+    </header>
+
+    <!-- TAB NAVIGATION BAR -->
+    <nav class="nav-tabs">
+        <button class="tab-btn active" data-tab="tab-dashboard"><i class="fa-solid fa-chart-line"></i> Dashboard</button>
+        <button class="tab-btn" data-tab="tab-telemetry"><i class="fa-solid fa-radar"></i> Telemetry Radar</button>
+        <button class="tab-btn" data-tab="tab-issues"><i class="fa-solid fa-triangle-exclamation"></i> City Issues Hub</button>
+        <button class="tab-btn" data-tab="tab-mesh"><i class="fa-solid fa-wifi"></i> Emergency Mesh</button>
+        <button class="tab-btn" data-tab="tab-analytics"><i class="fa-solid fa-sliders"></i> Stress Analytics</button>
+        <!-- Secret Owner Control Tab -->
+        <button class="tab-btn owner-tab" id="ownerTabBtn" data-tab="tab-owner" style="display: none;"><i class="fa-solid fa-user-shield"></i> Owner Command Center</button>
+    </nav>
+
+    <!-- MAIN APP CONTENT CONTAINER -->
+    <main class="container">
+
+        <!-- TAB 1: DASHBOARD -->
+        <section id="tab-dashboard" class="tab-content active">
+            <div class="glass-card">
+                <h2>Real-Time City Intelligence</h2>
+                <p style="color: var(--text-muted); margin-top: 0.3rem;">
+                    Active Telemetry Zone: <strong id="activeLocationDisplay" style="color: var(--primary-cyan);">Click GPS or Search Location</strong>
+                </p>
+            </div>
+
+            <div class="metrics-grid">
+                <div class="metric-card">
+                    <div style="font-size: 0.8rem; color: var(--text-muted);">Traffic Index <i class="fa-solid fa-car"></i></div>
+                    <div class="metric-value" id="valTraffic">-- %</div>
+                </div>
+                <div class="metric-card emerald">
+                    <div style="font-size: 0.8rem; color: var(--text-muted);">Air Quality (AQI) <i class="fa-solid fa-wind"></i></div>
+                    <div class="metric-value" id="valAqi">--</div>
+                </div>
+                <div class="metric-card amber">
+                    <div style="font-size: 0.8rem; color: var(--text-muted);">Renewable Load <i class="fa-solid fa-bolt"></i></div>
+                    <div class="metric-value" id="valEnergy">-- %</div>
+                </div>
+                <div class="metric-card purple">
+                    <div style="font-size: 0.8rem; color: var(--text-muted);">Active Mesh Nodes <i class="fa-solid fa-network-wired"></i></div>
+                    <div class="metric-value" id="valNodes">--</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- TAB 2: RICH SECTOR TELEMETRY RADAR -->
+        <section id="tab-telemetry" class="tab-content">
+            <div class="glass-card">
+                <h2 style="margin-bottom: 0.5rem;"><i class="fa-solid fa-radar" style="color: var(--primary-cyan);"></i> Sector Map Radar Telemetry</h2>
+                <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1rem;">Click any radar node on the map to review IoT health & live sensor metrics.</p>
+
+                <div class="sector-grid">
+                    <div class="radar-map-box">
+                        <div class="radar-grid-bg"></div>
+                        <div class="radar-sweep"></div>
+
+                        <!-- Pins -->
+                        <div class="sector-pin" style="top: 25%; left: 20%;" onclick="inspectSector('Central Zone (Market)', 'Pedestrian Flow Surge', 'Moderate', '84% Clear', '420 PPM', '88% Capacity')">
+                            <span class="status-dot"></span> Central Zone
+                        </div>
+                        <div class="sector-pin warning" style="top: 60%; left: 70%;" onclick="inspectSector('Industrial Zone', 'Substation Surge', 'Elevated', '92% Grid Load', '610 PPM', '74% Capacity')">
+                            <span class="status-dot"></span> Industrial Belt
+                        </div>
+                        <div class="sector-pin" style="top: 75%; left: 30%;" onclick="inspectSector('Tech Corridor', 'High Bandwidth Spike', 'Optimal', '99.8% Online', '310 PPM', '95% Capacity')">
+                            <span class="status-dot"></span> Tech Hub
+                        </div>
+                        <div class="sector-pin alert" style="top: 30%; left: 75%;" onclick="inspectSector('Riverside Eco Zone', 'Drainage Water Overflow Alert', 'High Severity', 'Sensor Flood Alert', '520 PPM', '60% Capacity')">
+                            <span class="status-dot"></span> Eco Corridor
+                        </div>
+                    </div>
+
+                    <!-- Telemetry Inspector Panel -->
+                    <div style="background: rgba(15, 23, 42, 0.85); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 12px; padding: 1.2rem; display: flex; flex-direction: column; gap: 1rem;">
+                        <h3 id="secTitle" style="color: var(--primary-cyan);">Sector Telemetry Inspector</h3>
+                        
+                        <div style="border-top: 1px solid rgba(255,255,255,0.08); padding-top: 0.8rem;">
+                            <div style="font-size: 0.78rem; color: var(--text-muted);">Primary Hazard Status:</div>
+                            <div id="secIssue" style="font-weight: 700; color: #fff;">Select a Sector Pin</div>
+                        </div>
+                        <div>
+                            <div style="font-size: 0.78rem; color: var(--text-muted);">Risk Rating:</div>
+                            <div id="secStatus" style="font-weight: 700; color: var(--primary-emerald);">--</div>
+                        </div>
+                        <div>
+                            <div style="font-size: 0.78rem; color: var(--text-muted);">Power Grid Reading:</div>
+                            <div id="secLoad" style="font-weight: 700; color: var(--accent-amber);">--</div>
+                        </div>
+                        <div>
+                            <div style="font-size: 0.78rem; color: var(--text-muted);">CO2 Emission Sensor:</div>
+                            <div id="secAqi" style="font-weight: 700; color: #fff;">--</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- TAB 3: CITY ISSUES HUB -->
+        <section id="tab-issues" class="tab-content">
+            <div class="white-issue-header">
+                <div>
+                    <h2><i class="fa-solid fa-city" style="color: #0284c7;"></i> City Issues Portal</h2>
+                    <p>Report public hazards directly to municipal authorities.</p>
+                </div>
+            </div>
+
+            <div class="glass-card">
+                <h3 style="margin-bottom: 1rem; color: var(--primary-cyan);"><i class="fa-solid fa-pen-to-square"></i> File a Public Hazard Report</h3>
+                <form id="issueReportForm" onsubmit="handleIssueSubmit(event)">
+                    <div class="report-form">
+                        <div class="form-group">
+                            <label><i class="fa-solid fa-tags"></i> Incident Category:</label>
+                            <input type="text" id="issueCategoryInput" class="form-control" placeholder="Type custom issue (e.g. Open Sewer, Pothole)" required>
+                        </div>
+                        <div class="form-group">
+                            <label><i class="fa-solid fa-location-crosshairs"></i> Target Location:</label>
+                            <input type="text" id="issueLocationInput" class="form-control" placeholder="Target street or area address" required>
+                        </div>
+                        <div class="form-group full">
+                            <label><i class="fa-solid fa-align-left"></i> Description:</label>
+                            <textarea id="issueDescInput" class="form-control" rows="3" placeholder="Provide clear details regarding the hazard..." required></textarea>
+                        </div>
+
+                        <!-- PHOTO ATTACHMENT BOX -->
+                        <div class="form-group full">
+                            <label><i class="fa-solid fa-camera"></i> Upload Photo Evidence:</label>
+                            <div class="file-dropzone" onclick="document.getElementById('issuePhotoInput').click()">
+                                <i class="fa-solid fa-cloud-arrow-up"></i>
+                                <div style="font-size: 0.85rem; font-weight: 600;">Click or drag photo here to attach</div>
+                            </div>
+                            <input type="file" id="issuePhotoInput" accept="image/*" style="display: none;" onchange="handlePhotoSelect(event)">
+                            
+                            <div id="photoPreviewContainer" style="display: none;" class="file-preview">
+                                <img id="photoPreviewImg" src="" alt="Preview">
+                                <div style="flex: 1;">
+                                    <div id="photoFileName" style="font-size: 0.82rem; font-weight: 600;">--</div>
+                                    <div style="font-size: 0.72rem; color: var(--primary-emerald);">Photo Ready</div>
+                                </div>
+                                <button type="button" class="btn btn-outline" style="padding: 0.3rem 0.6rem; font-size: 0.75rem;" onclick="removeAttachedPhoto()">Remove</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style="margin-top: 1.2rem; display: flex; justify-content: flex-end;">
+                        <button type="submit" class="btn btn-cyan">
+                            <i class="fa-solid fa-paper-plane"></i> Submit Incident Ticket
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- PUBLIC INCIDENT FEED -->
+            <div class="glass-card">
+                <h3 style="margin-bottom: 1.2rem;"><i class="fa-solid fa-list-check" style="color: var(--primary-cyan);"></i> Public City Incident Feed</h3>
+                <div id="publicIssueFeed"></div>
+            </div>
+        </section>
+
+        <!-- TAB 4: OFF-GRID MESH BROADCASTER -->
+        <section id="tab-mesh" class="tab-content">
+            <div class="glass-card">
+                <h2><i class="fa-solid fa-wifi" style="color: var(--primary-cyan);"></i> Off-Grid Emergency Mesh Broadcaster</h2>
+                <p style="color: var(--text-muted); font-size: 0.88rem; margin-top: 0.5rem;">
+                    Simulate peer-to-peer Bluetooth Low Energy (BLE) and Wi-Fi Direct packet relays during cellular network outage.
+                </p>
+
+                <div class="mesh-container">
+                    <div class="mesh-line"></div>
+                    <div class="mesh-node active" id="mn1">
+                        <div class="mesh-circle"><i class="fa-solid fa-tower-cell"></i></div>
+                        <span style="font-size: 0.75rem; font-weight: 700;">Origin Node</span>
+                    </div>
+                    <div class="mesh-node" id="mn2">
+                        <div class="mesh-circle"><i class="fa-solid fa-mobile-screen"></i></div>
+                        <span style="font-size: 0.75rem; color: var(--text-muted);">Hop 1 (Mobile)</span>
+                    </div>
+                    <div class="mesh-node" id="mn3">
+                        <div class="mesh-circle"><i class="fa-solid fa-lightbulb"></i></div>
+                        <span style="font-size: 0.75rem; color: var(--text-muted);">Hop 2 (Smart Pole)</span>
+                    </div>
+                    <div class="mesh-node" id="mn4">
+                        <div class="mesh-circle"><i class="fa-solid fa-house-signal"></i></div>
+                        <span style="font-size: 0.75rem; color: var(--text-muted);">Hop 3 (Receiver)</span>
+                    </div>
+                </div>
+
+                <button class="btn btn-cyan" onclick="simulateMeshBroadcast()"><i class="fa-solid fa-satellite-dish"></i> Trigger Mesh Packet Relay Simulation</button>
+
+                <div id="meshLogBox" style="margin-top: 1rem; background: rgba(8, 12, 24, 0.95); border: 1px solid rgba(0, 229, 255, 0.3); border-radius: 8px; padding: 1rem; font-family: monospace; color: var(--primary-cyan); font-size: 0.82rem; min-height: 100px;">
+                    > Mesh System Online. Awaiting packet trigger...
+                </div>
+            </div>
+        </section>
+
+        <!-- TAB 5: URBAN STRESS ANALYTICS -->
+        <section id="tab-analytics" class="tab-content">
+            <div class="glass-card">
+                <h2><i class="fa-solid fa-chart-line" style="color: var(--primary-cyan);"></i> Predictive Urban Stress Analytics</h2>
+                <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 1.5rem;">Adjust parameters below to simulate dynamic stress response curves.</p>
+
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.2rem; margin-bottom: 1.5rem;">
+                    <div>
+                        <label style="font-size: 0.82rem;">Rainfall (mm/hr): <strong id="rainVal" style="color: var(--primary-cyan);">25</strong></label>
+                        <input type="range" id="rainSlider" min="0" max="100" value="25" style="width: 100%; margin-top: 0.4rem;" oninput="updateStressChart()">
+                    </div>
+                    <div>
+                        <label style="font-size: 0.82rem;">Traffic Density Surge (%): <strong id="trafficVal" style="color: var(--accent-amber);">40</strong></label>
+                        <input type="range" id="trafficSlider" min="0" max="100" value="40" style="width: 100%; margin-top: 0.4rem;" oninput="updateStressChart()">
+                    </div>
+                    <div>
+                        <label style="font-size: 0.82rem;">Power Grid Load (%): <strong id="gridVal" style="color: var(--accent-purple);">60</strong></label>
+                        <input type="range" id="gridSlider" min="0" max="100" value="60" style="width: 100%; margin-top: 0.4rem;" oninput="updateStressChart()">
+                    </div>
+                </div>
+
+                <div style="height: 320px; position: relative;">
+                    <canvas id="stressChart"></canvas>
+                </div>
+            </div>
+        </section>
+
+        <!-- TAB 6: EXCLUSIVE OWNER COMMAND CENTER -->
+        <section id="tab-owner" class="tab-content">
+            <div class="glass-card" style="border-color: var(--accent-amber);">
+                <h2 style="color: var(--accent-amber);"><i class="fa-solid fa-user-shield"></i> Owner Command Center</h2>
+                <div style="overflow-x: auto; margin-top: 1rem;">
+                    <table style="width: 100%; border-collapse: collapse; font-size: 0.85rem;">
+                        <thead>
+                            <tr style="background: rgba(30, 41, 59, 0.6); color: var(--accent-amber); text-align: left;">
+                                <th style="padding: 0.8rem;">ID</th><th>Category</th><th>Location</th><th>Reporter</th><th>Photo</th><th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="ownerReportTableBody"></tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- AUTHENTICATION MODAL -->
+    <div class="modal-overlay" id="authModal">
+        <div class="modal-box">
+            <button class="modal-close" onclick="closeAuthModal()"><i class="fa-solid fa-xmark"></i></button>
+            <h2 style="text-align: center;"><i class="fa-solid fa-right-to-bracket" style="color: var(--primary-cyan);"></i> Account Access</h2>
+            <form id="authForm" onsubmit="handleAuthSubmit(event)" style="margin-top: 1rem;">
+                <div class="form-group">
+                    <label>Email Address:</label>
+                    <input type="email" id="authEmail" class="form-control" placeholder="Enter email" required>
+                </div>
+                <div class="form-group">
+                    <label>Password:</label>
+                    <input type="password" id="authPassword" class="form-control" placeholder="Enter password" required>
+                </div>
+                <button type="submit" class="btn btn-cyan" style="width: 100%; justify-content: center; margin-top: 1rem;">Login / Register</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- EMPATHETIC SUBMISSION CONFIRMATION MODAL -->
+    <div class="modal-overlay" id="empathyModal">
+        <div class="modal-box" style="text-align: center;">
+            <h3 style="color: #fff;">Ticket Registered</h3>
+            <p style="font-size: 0.92rem; color: #cbd5e1; margin: 1rem 0;">
+                "We are very sorry for this inconvenience! Our Smart Infrastructure Taskforce has received your geotagged report and will work to solve this as soon as possible."
+            </p>
+            <button class="btn btn-cyan" onclick="document.getElementById('empathyModal').classList.remove('active')" style="width: 100%; justify-content: center;">Acknowledge</button>
+        </div>
+    </div>
+
+    <!-- PITCH MODAL -->
+    <div class="modal-overlay" id="pitchModal">
+        <div class="modal-box" style="max-width: 600px;">
+            <button class="modal-close" onclick="closePitchModal()"><i class="fa-solid fa-xmark"></i></button>
+            <h2 style="color: var(--primary-cyan); margin-bottom: 0.5rem;"><i class="fa-solid fa-trophy"></i> NagrikOne Pitch Strategy</h2>
+            <div style="font-size: 0.88rem; line-height: 1.5; color: #cbd5e1; display: flex; flex-direction: column; gap: 0.8rem; margin-top: 1rem;">
+                <div style="background: rgba(15,23,42,0.8); padding: 0.8rem; border-left: 3px solid var(--primary-cyan);">
+                    <strong>Problem:</strong> Standard municipal apps collapse during grid failures and fail to provide exact geotags.
+                </div>
+                <div style="background: rgba(15,23,42,0.8); padding: 0.8rem; border-left: 3px solid var(--primary-emerald);">
+                    <strong>USP:</strong> NagrikOne's Off-Grid P2P Mesh Communication ensures broadcasts reach citizens even without internet.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
